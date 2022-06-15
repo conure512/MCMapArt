@@ -1,0 +1,93 @@
+package conure.mapart;
+import java.util.HashMap;
+public class Constants {
+	public static final String LIGHT_SUFFIX="_LIGHT",DARK_SUFFIX="_DARK",SHADE4_SUFFIX="_SHADE4";
+	public static final HashMap<String,int[]> baseColors,heightShades,shade4;
+	public static final HashMap<String,Integer> colorID;
+	private static int colorCount;
+	static {
+		baseColors=new HashMap<String,int[]>();
+		heightShades=new HashMap<String,int[]>();
+		shade4=new HashMap<String,int[]>();
+		colorID=new HashMap<String,Integer>();
+		colorCount=0;
+		put(new int[] {127,178,56},"GRASS");
+		put(new int[] {247,233,163},"SAND");
+		put(new int[] {199,199,199},"WOOL");
+		put(new int[] {255,0,0},"FIRE");
+		put(new int[] {160,160,255},"ICE");
+		put(new int[] {167,167,167},"METAL");
+		put(new int[] {0,124,0},"PLANT");
+		put(new int[] {255,255,255},"SNOW");
+		put(new int[] {164,168,184},"CLAY");
+		put(new int[] {151,109,77},"DIRT");
+		put(new int[] {112,112,112},"STONE");
+		put(new int[] {64,64,255},"WATER");
+		put(new int[] {143,119,72},"WOOD");
+		put(new int[] {255,252,245},"QUARTZ");
+		put(new int[] {216,127,51},"COLOR_ORANGE");
+		put(new int[] {178,76,216},"COLOR_MAGENTA");
+		put(new int[] {102,153,216},"COLOR_LIGHT_BLUE");
+		put(new int[] {229,229,51},"COLOR_YELLOW");
+		put(new int[] {127,204,25},"COLOR_LIGHT_GREEN");
+		put(new int[] {242,127,165},"COLOR_PINK");
+		put(new int[] {76,76,76},"COLOR_GRAY");
+		put(new int[] {153,153,153},"COLOR_LIGHT_GRAY");
+		put(new int[] {76,127,153},"COLOR_CYAN");
+		put(new int[] {127,63,178},"COLOR_PURPLE");
+		put(new int[] {51,76,178},"COLOR_BLUE");
+		put(new int[] {102,76,51},"COLOR_BROWN");
+		put(new int[] {102,127,51},"COLOR_GREEN");
+		put(new int[] {153,51,51},"COLOR_RED");
+		put(new int[] {25,25,25},"COLOR_BLACK");
+		put(new int[] {250,238,77},"GOLD");
+		put(new int[] {92,219,213},"DIAMOND");
+		put(new int[] {74,128,255},"LAPIS");
+		put(new int[] {0,217,58},"EMERALD");
+		put(new int[] {129,86,49},"PODZOL");
+		put(new int[] {112,2,0},"NETHER");
+		put(new int[] {209,177,161},"TERRACOTTA_WHITE");
+		put(new int[] {159,82,36},"TERRACOTTA_ORANGE");
+		put(new int[] {149,87,108},"TERRACOTTA_MAGENTA");
+		put(new int[] {112,108,138},"TERRACOTTA_LIGHT_BLUE");
+		put(new int[] {186,133,36},"TERRACOTTA_YELLOW");
+		put(new int[] {103,117,53},"TERRACOTTA_LIGHT_GREEN");
+		put(new int[] {160,77,78},"TERRACOTTA_PINK");
+		put(new int[] {57,41,35},"TERRACOTTA_GRAY");
+		put(new int[] {135,107,98},"TERRACOTTA_LIGHT_GRAY");
+		put(new int[] {87,92,92},"TERRACOTTA_CYAN");
+		put(new int[] {122,73,88},"TERRACOTTA_PURPLE");
+		put(new int[] {76,62,92},"TERRACOTTA_BLUE");
+		put(new int[] {76,50,35},"TERRACOTTA_BROWN");
+		put(new int[] {76,82,42},"TERRACOTTA_GREEN");
+		put(new int[] {142,60,46},"TERRACOTTA_RED");
+		put(new int[] {37,22,16},"TERRACOTTA_BLACK");
+		put(new int[] {189,48,49},"CRIMSON_NYLIUM");
+		put(new int[] {148,63,97},"CRIMSON_STEM");
+		put(new int[] {92,25,29},"CRIMSON_HYPHAE");
+		put(new int[] {22,126,134},"WARPED_NYLIUM");
+		put(new int[] {58,142,140},"WARPED_STEM");
+		put(new int[] {86,44,62},"WARPED_HYPHAE");
+		put(new int[] {20,180,133},"WARPED_WART_BLOCK");
+		put(new int[] {100,100,100},"DEEPSLATE");
+		put(new int[] {216,175,147},"RAW_IRON");
+		put(new int[] {127,167,150},"GLOW_LICHEN");
+	}
+	private static void put(int[] pix,String id) {
+		int[] base=new int[3],dark=new int[3],darkest=new int[3];
+		for(int i=0;i<3;i++) {
+			base[i]=(int)(pix[i]*.86);
+			dark[i]=(int)(pix[i]*.71);
+			darkest[i]=(int)(pix[i]*.53);
+		}
+		heightShades.put(id+DARK_SUFFIX,dark);
+		baseColors.put(id,base);
+		heightShades.put(id+LIGHT_SUFFIX,pix);
+		shade4.put(id+SHADE4_SUFFIX,darkest);
+		colorCount++;
+		colorID.put(id+DARK_SUFFIX,colorCount*4);
+		colorID.put(id,colorCount*4+1);
+		colorID.put(id+LIGHT_SUFFIX,colorCount*4+2);
+		colorID.put(id+SHADE4_SUFFIX,colorCount*4+3);
+	}
+}
