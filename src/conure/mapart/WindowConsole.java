@@ -37,8 +37,8 @@ public class WindowConsole extends JFrame {
 		loadButton=new JButton("Generate Map");
 		loadButton.setBounds(2,36,130,20);
 		panel.add(loadButton);
-		errorMsg=new JLabel("Unable to open file.");
-		errorMsg.setBounds(5,56,120,15);
+		errorMsg=new JLabel();
+		errorMsg.setBounds(5,56,130,15);
 		errorMsg.setVisible(false);
 		panel.add(errorMsg);
 		label=new JLabel("Map Loading Options");
@@ -114,8 +114,15 @@ public class WindowConsole extends JFrame {
 		setPostLoadEnabled(false);
 		loadButton.addActionListener(e -> {
 			try {
-				data=Main.generateMap(ImageIO.read(new File(loadPath.getText())),useHeightShades.isSelected(),useShade4.isSelected());
+				BufferedImage img=ImageIO.read(new File(loadPath.getText()));
+				if(img==null) {
+					errorMsg.setText("File must be an image.");
+					errorMsg.setVisible(true);
+					return;
+				} else
+					data=Main.generateMap(img,useHeightShades.isSelected(),useShade4.isSelected());
 			} catch(IOException ex) {
+				errorMsg.setText("Unable to open file.");
 				errorMsg.setVisible(true);
 				return;
 			}
