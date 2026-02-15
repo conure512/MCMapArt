@@ -1,4 +1,5 @@
 bin/*
+.settings/*
 config.dat
 .classpath
 .project
