@@ -12,10 +12,9 @@ public final class Config {
 	public static String imageToLoad;
 	public static boolean useHeightShades,useShade4;
 	public static int[] origin;
-	public static int scale,heightColumn,mapID;
+	public static int scale,heightColumn,mapID,versionIndex;
 	public static void load() {
-		try {
-			DataInputStream reader=new DataInputStream(new GZIPInputStream(new FileInputStream(file)));
+		try(DataInputStream reader=new DataInputStream(new GZIPInputStream(new FileInputStream(file)))) {
 			int next=reader.readShort();
 			imageToLoad="";
 			for(int i=0;i<next;i++)
@@ -29,7 +28,7 @@ public final class Config {
 			if(heightColumn<origin[0]||heightColumn>origin[0]+127)
 				heightColumn=origin[0];
 			mapID=reader.readInt();
-			reader.close();
+			versionIndex=reader.readInt();
 		} catch(IOException e) {
 			imageToLoad="";
 			useHeightShades=true;
@@ -38,11 +37,11 @@ public final class Config {
 			scale=1;
 			heightColumn=-64;
 			mapID=0;
+			versionIndex=0;
 		}
 	}
-	public static void save(String img,boolean heightShades,boolean shade4,int[] org,int scl,int col,int id) {
-		try {
-			DataOutputStream writer=new DataOutputStream(new GZIPOutputStream(new FileOutputStream(file)));
+	public static void save(String img,boolean heightShades,boolean shade4,int[] org,int scl,int col,int id,int vInd) {
+		try(DataOutputStream writer=new DataOutputStream(new GZIPOutputStream(new FileOutputStream(file)))) {
 			writer.writeShort(img.length());
 			writer.writeBytes(img);
 			int boolBits=0;
@@ -56,6 +55,7 @@ public final class Config {
 			writer.writeInt(scl);
 			writer.writeInt(col);
 			writer.writeInt(id);
+			writer.writeInt(vInd);
 			writer.close();
 		} catch(IOException e) {}
 	}

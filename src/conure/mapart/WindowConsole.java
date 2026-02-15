@@ -1,4 +1,5 @@
 package conure.mapart;
+import java.awt.event.ActionEvent;
 import java.awt.event.WindowEvent;
 import java.awt.event.WindowListener;
 import java.awt.image.BufferedImage;
@@ -9,6 +10,7 @@ import javax.imageio.ImageIO;
 import javax.swing.ImageIcon;
 import javax.swing.JButton;
 import javax.swing.JCheckBox;
+import javax.swing.JComboBox;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
@@ -16,12 +18,14 @@ import javax.swing.JSpinner;
 import javax.swing.JTextField;
 import javax.swing.SpinnerNumberModel;
 public class WindowConsole extends JFrame {
-	private static final long serialVersionUID=1L;
+	private static final long serialVersionUID=512L;
 	private final JTextField loadPath;
 	private final JButton loadButton,viewFullMap,viewHeightMap,viewMaterials,exportButton;
 	private final JCheckBox useHeightShades,useShade4;
 	private final JSpinner oX,oZ,scale,heightColumn,mapID;
 	private final JLabel mapIcon,errorMsg,fileCount;
+	private final JComboBox<DataVersion> dataVersionSelector;
+	private int dataVersionLoaded=0;
 	private MaterialMap data;
 	public WindowConsole() {
 		super("Minecraft Map Generator");
@@ -37,6 +41,10 @@ public class WindowConsole extends JFrame {
 		loadButton=new JButton("Generate Map");
 		loadButton.setBounds(2,36,130,20);
 		panel.add(loadButton);
+		dataVersionSelector=new JComboBox<DataVersion>(DataVersion.values());
+		dataVersionSelector.setSelectedIndex(Config.versionIndex);
+		dataVersionSelector.setBounds(134,36,100,20);
+		panel.add(dataVersionSelector);
 		errorMsg=new JLabel();
 		errorMsg.setBounds(5,56,130,15);
 		errorMsg.setVisible(false);
@@ -112,56 +120,20 @@ public class WindowConsole extends JFrame {
 		panel.add(fileCount);
 		add(panel);
 		setPostLoadEnabled(false);
-		loadButton.addActionListener(e -> {
-			try {
-				BufferedImage img=ImageIO.read(new File(loadPath.getText()));
-				if(img==null) {
-					errorMsg.setText("File must be an image.");
-					errorMsg.setVisible(true);
-					return;
-				} else
-					data=Main.generateMap(img,useHeightShades.isSelected(),useShade4.isSelected());
-			} catch(IOException ex) {
-				errorMsg.setText("Unable to open file.");
-				errorMsg.setVisible(true);
-				return;
-			}
-			errorMsg.setVisible(false);
-			setPostLoadEnabled(true);
-			alignColumnToAxis();
-			int wD=data.pixels.length,hD=data.pixels[0].length,
-					w=(int)(128.0*wD/Math.max(wD,hD)),h=(int)(128.0*hD/Math.max(wD,hD));
-			BufferedImage icon=new BufferedImage(w,h,BufferedImage.TYPE_INT_ARGB);
-			int[] raster=((DataBufferInt)icon.getRaster().getDataBuffer()).getData();
-			for(int y=0;y<h;y++)
-				for(int x=0;x<w;x++)
-					raster[y*w+x]=data.pixels[x*wD/w][y*hD/h];
-			mapIcon.setIcon(new ImageIcon(icon));
-			mapIcon.setSize(w,h);
-			int c=(int)Math.ceil(data.materials.length/128d)*(int)Math.ceil(data.materials[0].length/128d);
-			fileCount.setText("<html>Exporting will create<br/>"+c+" map file"+(c==1?"":"s")+".</html>");
-		});
+		loadButton.addActionListener(this::loadButtonClicked);
 		oX.addChangeListener(e -> alignColumnToAxis());
 		viewFullMap.addActionListener(e -> new RenderWindow(data,new int[] {(int)oX.getValue(),(int)oZ.getValue()},(int)scale.getValue()).setVisible(true));
 		viewHeightMap.addActionListener(e -> new HeightMapWindow(data,(int)heightColumn.getValue(),
 				new int[] {(int)oX.getValue(),(int)oZ.getValue()},(int)scale.getValue()).setVisible(true));
 		viewMaterials.addActionListener(e -> new MaterialWindow(data).setVisible(true));
-		exportButton.addActionListener(e -> {
-			try {
-				int id=(int)mapID.getValue();
-				for(int oy=0;oy<data.materials[0].length;oy+=128)
-					for(int ox=0;ox<data.materials.length;ox+=128) {
-						NBTFiles.exportMap(data.materials,new int[] {ox,oy},Main.directory+"map_"+id+".dat");
-						id++;
-					}
-			} catch(IOException ex) {}
-		});
+		exportButton.addActionListener(this::exportButtonClicked);
 		addWindowListener(new WindowListener() {
 			@Override
 			public void windowClosing(WindowEvent e) {
 				Config.save(loadPath.getText(),useHeightShades.isSelected(),useShade4.isSelected(),
 						new int[] {(int)oX.getValue(),(int)oZ.getValue()},
-						(int)scale.getValue(),(int)heightColumn.getValue(),(int)mapID.getValue());
+						(int)scale.getValue(),(int)heightColumn.getValue(),(int)mapID.getValue(),
+						dataVersionSelector.getSelectedIndex());
 			}
 			@Override
 			public void windowActivated(WindowEvent e) {}
@@ -191,5 +163,46 @@ public class WindowConsole extends JFrame {
 		heightColumn.setEnabled(enable);
 		exportButton.setEnabled(enable);
 		mapID.setEnabled(enable);
+	}
+	private void loadButtonClicked(ActionEvent e) {
+		try {
+			BufferedImage img=ImageIO.read(new File(loadPath.getText()));
+			if(img==null) {
+				errorMsg.setText("File must be an image.");
+				errorMsg.setVisible(true);
+				return;
+			}
+			int dv=((DataVersion)dataVersionSelector.getSelectedItem()).id;
+			data=Main.generateMap(img,useHeightShades.isSelected(),useShade4.isSelected(),dv);
+			dataVersionLoaded=dv; //Only update version if generateMap() succeeds
+		} catch(IOException ex) {
+			errorMsg.setText("Unable to open file.");
+			errorMsg.setVisible(true);
+			return;
+		}
+		errorMsg.setVisible(false);
+		setPostLoadEnabled(true);
+		alignColumnToAxis();
+		int wD=data.pixels.length,hD=data.pixels[0].length,
+				w=(int)(128.0*wD/Math.max(wD,hD)),h=(int)(128.0*hD/Math.max(wD,hD));
+		BufferedImage icon=new BufferedImage(w,h,BufferedImage.TYPE_INT_ARGB);
+		int[] raster=((DataBufferInt)icon.getRaster().getDataBuffer()).getData();
+		for(int y=0;y<h;y++)
+			for(int x=0;x<w;x++)
+				raster[y*w+x]=data.pixels[x*wD/w][y*hD/h];
+		mapIcon.setIcon(new ImageIcon(icon));
+		mapIcon.setSize(w,h);
+		int c=(int)Math.ceil(data.materials.length/128d)*(int)Math.ceil(data.materials[0].length/128d);
+		fileCount.setText("<html>Exporting will create<br/>"+c+" map file"+(c==1?"":"s")+".</html>");
+	}
+	private void exportButtonClicked(ActionEvent e) {
+		try {
+			int id=(int)mapID.getValue();
+			for(int oy=0;oy<data.materials[0].length;oy+=128)
+				for(int ox=0;ox<data.materials.length;ox+=128) {
+					NBTFiles.exportMap(Main.directory+"map_"+id+".dat",data.materials,new int[] {ox,oy},dataVersionLoaded);
+					id++;
+				}
+		} catch(IOException ex) {}
 	}
 }

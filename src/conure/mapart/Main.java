@@ -10,17 +10,18 @@ public class Main {
 			directory="";
 		}
 		Config.load();
+		System.setProperty("sun.java2d.uiScale","1");
 	}
 	public static void main(String[] args) {
 		new WindowConsole().setVisible(true);
 	}
-	static MaterialMap generateMap(BufferedImage img,boolean useHeightShades,boolean useShade4) {
+	static MaterialMap generateMap(BufferedImage img,boolean useHeightShades,boolean useShade4,int maxVersion) {
 		int w=img.getWidth(),h=img.getHeight();
 		int[][] pixels=new int[w][h];
 		String[][] materialMap=new String[w][h];
 		for(int y=0;y<h;y++)
 			for(int x=0;x<w;x++) {
-				int[] pix=getNearestColor(fromRGB(img.getRGB(x,y)),useHeightShades,useShade4);
+				int[] pix=getNearestColor(fromRGB(img.getRGB(x,y)),useHeightShades,useShade4,maxVersion);
 				pixels[x][y]=toARGB(pix);
 				materialMap[x][y]=getColorID(pix);
 			}
@@ -53,39 +54,45 @@ public class Main {
 		return 0xff000000+(rgb[0]<<16)+(rgb[1]<<8)+rgb[2];
 	}
 	private static String getColorID(int[] color) {
-		for(String c:Constants.baseColors.keySet())
-			if(color.equals(Constants.baseColors.get(c)))
-				return c;
-		for(String c:Constants.heightShades.keySet())
-			if(color.equals(Constants.heightShades.get(c)))
-				return c;
-		for(String c:Constants.shade4.keySet())
-			if(color.equals(Constants.shade4.get(c)))
-				return c;
+		for(MapColor c:Constants.colors) {
+			if(color.equals(c.base))
+				return c.name;
+			if(color.equals(c.light))
+				return c.name+Constants.LIGHT_SUFFIX;
+			if(color.equals(c.dark))
+				return c.name+Constants.DARK_SUFFIX;
+			if(color.equals(c.shade4))
+				return c.name+Constants.SHADE4_SUFFIX;
+		}
 		return null;
 	}
-	private static int[] getNearestColor(int[] color,boolean useHeightShades,boolean useShade4) {
-		double min=-1.0,d;
+	private static int[] getNearestColor(int[] color,boolean useHeightShades,boolean useShade4,int maxVersion) {
+		double min=Double.MAX_VALUE,d;
 		int[] sol=null;
-		for(int[] c:Constants.baseColors.values()) {
-			d=sqrDist(color,c);
-			if(min==-1.0||d<min) {
+		for(MapColor c:Constants.colors) if(c.dataVersion<=maxVersion) {
+			d=sqrDist(color,c.base);
+			if(d<min) {
 				min=d;
-				sol=c;
+				sol=c.base;
 			}
-		}
-		if(useHeightShades) for(int[] c:Constants.heightShades.values()) {
-			d=sqrDist(color,c);
-			if(min==-1.0||d<min) {
-				min=d;
-				sol=c;
+			if(useHeightShades) {
+				d=sqrDist(color,c.light);
+				if(d<min) {
+					min=d;
+					sol=c.light;
+				}
+				d=sqrDist(color,c.dark);
+				if(d<min) {
+					min=d;
+					sol=c.dark;
+				}
 			}
-		}
-		if(useShade4) for(int[] c:Constants.shade4.values()) {
-			d=sqrDist(color,c);
-			if(min==-1.0||d<min) {
-				min=d;
-				sol=c;
+			if(useShade4&&maxVersion>=DataVersion.V1_8.id) { //shade4 is bugged pre-1.8
+				d=sqrDist(color,c.shade4);
+				if(d<min) {
+					min=d;
+					sol=c.shade4;
+				}
 			}
 		}
 		return sol;
