@@ -1,6 +1,6 @@
 # MCMapArt
 
-An app that turns regular images into usable (or buildable) Minecraft Maps!
+An app that turns regular images into useable (or buildable) Minecraft Maps!
 
 Download the runnable jar [HERE](https://drive.google.com/file/d/1NkCl9enSex0oWMzlZZeecsdQY31t1ta7/view?usp=sharing)
 
