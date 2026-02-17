@@ -11,11 +11,11 @@ With a map loaded into the program, clicking the “Export to Files” button wi
 To import these maps into a Minecraft world, simply go to the “data” folder in the world’s directory and place the files there. Make sure the file names are not changed - they should all look like `map_#.dat` where `#` is some number. If the world is currently open (on a client or server), shut it down before importing the files, then restart it once they’ve been imported.
 Upon re-entering the world, make sure you have command permissions, and type the following command:
 
-`/give @s filled_map{map:#}` (before 1.20.5)
-
 `/give @s filled_map[map_id=#]` (1.20.5+)
 
-where `#` is the same number as `map_#.dat`. (If you’re importing multiple files, run this command for each file you imported.) You should now be holding map item(s) containing the images you just imported. Images consisting of multiple maps are best viewed with multiple item frames!
+`/give @s filled_map{map:#}` (before 1.20.5)
+
+where `#` is the same number as `map_#.dat`. (If you’re importing multiple files, run this command for each file you imported.) You should now be holding map item(s) containing the image you just imported. Images consisting of multiple maps are best viewed with multiple item frames!
 
 ### Method 2: Building a Map By Hand
 (for the people who think Method 1 is cheating)

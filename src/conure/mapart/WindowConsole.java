@@ -119,7 +119,7 @@ public class WindowConsole extends JFrame {
 		fileCount.setBounds(165,186,120,40);
 		panel.add(fileCount);
 		saveSession=new JCheckBox("Save Session on Exit",Session.sessionFound);
-		saveSession.setBounds(80,190,160,20);
+		saveSession.setBounds(2,180,160,20);
 		panel.add(saveSession);
 		add(panel);
 		setPostLoadEnabled(false);
