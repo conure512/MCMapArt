@@ -1,11 +1,12 @@
 package conure.mapart;
 import java.util.HashMap;
 public class MaterialMap {
+	/**2x2 grid of ints, where each int is a raw color value compatible with a Raster*/
 	public int[][] pixels;
 	public String[][] materials;
-	public MaterialMap(int[][] pix,String[][] mat) {
-		pixels=pix;
-		materials=mat;
+	public MaterialMap(int[][] pixels,String[][] materials) {
+		this.pixels=pixels;
+		this.materials=materials;
 	}
 	public HashMap<String,Integer> getMaterialCounts() {
 		HashMap<String,Integer> counts=new HashMap<String,Integer>();

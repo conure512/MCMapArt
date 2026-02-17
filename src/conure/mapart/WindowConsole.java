@@ -21,8 +21,8 @@ public class WindowConsole extends JFrame {
 	private static final long serialVersionUID=512L;
 	private final JTextField loadPath;
 	private final JButton loadButton,viewFullMap,viewHeightMap,viewMaterials,exportButton;
-	private final JCheckBox useHeightShades,useShade4;
-	private final JSpinner oX,oZ,scale,heightColumn,mapID;
+	private final JCheckBox useHeightShades,useShade4,saveSession;
+	private final JSpinner originX,originZ,scale,heightColumn,mapID;
 	private final JLabel mapIcon,errorMsg,fileCount;
 	private final JComboBox<DataVersion> dataVersionSelector;
 	private int dataVersionLoaded=0;
@@ -35,14 +35,14 @@ public class WindowConsole extends JFrame {
 		JLabel label=new JLabel("Image File to Load");
 		label.setBounds(2,0,105,15);
 		panel.add(label);
-		loadPath=new JTextField(Config.imageToLoad);
+		loadPath=new JTextField(Session.imageToLoad);
 		loadPath.setBounds(2,16,250,20);
 		panel.add(loadPath);
 		loadButton=new JButton("Generate Map");
 		loadButton.setBounds(2,36,130,20);
 		panel.add(loadButton);
 		dataVersionSelector=new JComboBox<DataVersion>(DataVersion.values());
-		dataVersionSelector.setSelectedIndex(Config.versionIndex);
+		dataVersionSelector.setSelectedIndex(Session.versionIndex);
 		dataVersionSelector.setBounds(134,36,100,20);
 		panel.add(dataVersionSelector);
 		errorMsg=new JLabel();
@@ -52,33 +52,33 @@ public class WindowConsole extends JFrame {
 		label=new JLabel("Map Loading Options");
 		label.setBounds(260,0,125,15);
 		panel.add(label);
-		useHeightShades=new JCheckBox("Use Height Shading",Config.useHeightShades);
+		useHeightShades=new JCheckBox("Use Height Shading",Session.useHeightShades);
 		useHeightShades.setBounds(256,15,140,20);
 		panel.add(useHeightShades);
-		useShade4=new JCheckBox("Use Shade4",Config.useShade4);
+		useShade4=new JCheckBox("Use Shade4",Session.useShade4);
 		useShade4.setBounds(256,35,95,20);
 		panel.add(useShade4);
-		label=new JLabel("Map Coordinates");
+		label=new JLabel("Top-Left Corner");
 		label.setBounds(420,0,100,15);
 		panel.add(label);
 		label=new JLabel("x=");
 		label.setBounds(420,20,20,15);
 		panel.add(label);
 		SpinnerNumberModel model=new SpinnerNumberModel();
-		model.setValue(Config.origin[0]);
+		model.setValue(Session.origin[0]);
 		model.setStepSize(128);
-		oX=new JSpinner(model);
-		oX.setBounds(435,17,50,20);
-		panel.add(oX);
+		originX=new JSpinner(model);
+		originX.setBounds(435,17,50,20);
+		panel.add(originX);
 		label=new JLabel("z=");
 		label.setBounds(420,40,20,15);
 		panel.add(label);
 		model=new SpinnerNumberModel();
-		model.setValue(Config.origin[1]);
+		model.setValue(Session.origin[1]);
 		model.setStepSize(128);
-		oZ=new JSpinner(model);
-		oZ.setBounds(435,37,50,20);
-		panel.add(oZ);
+		originZ=new JSpinner(model);
+		originZ.setBounds(435,37,50,20);
+		panel.add(originZ);
 		viewFullMap=new JButton("View Interactive Map");
 		viewFullMap.setBounds(2,80,155,20);
 		panel.add(viewFullMap);
@@ -88,13 +88,13 @@ public class WindowConsole extends JFrame {
 		label=new JLabel("at scale");
 		label.setBounds(22,105,50,15);
 		panel.add(label);
-		scale=new JSpinner(new SpinnerNumberModel(Config.scale,1,10,1));
+		scale=new JSpinner(new SpinnerNumberModel(Session.scale,1,10,1));
 		scale.setBounds(70,102,32,20);
 		panel.add(scale);
 		label=new JLabel("for column x=");
 		label.setBounds(170,105,100,15);
 		panel.add(label);
-		heightColumn=new JSpinner(new SpinnerNumberModel(Config.heightColumn,Config.heightColumn,Config.heightColumn,1));
+		heightColumn=new JSpinner(new SpinnerNumberModel(Session.heightColumn,Session.heightColumn,Session.heightColumn,1));
 		heightColumn.setBounds(248,102,50,20);
 		panel.add(heightColumn);
 		mapIcon=new JLabel("No image loaded.");
@@ -108,7 +108,7 @@ public class WindowConsole extends JFrame {
 		panel.add(exportButton);
 		model=new SpinnerNumberModel();
 		model.setMinimum(0);
-		model.setValue(Config.mapID);
+		model.setValue(Session.mapID);
 		label=new JLabel("Starting map ID:");
 		label.setBounds(165,170,90,15);
 		panel.add(label);
@@ -118,22 +118,26 @@ public class WindowConsole extends JFrame {
 		fileCount=new JLabel();
 		fileCount.setBounds(165,186,120,40);
 		panel.add(fileCount);
+		saveSession=new JCheckBox("Save Session on Exit",Session.sessionFound);
+		saveSession.setBounds(80,190,160,20);
+		panel.add(saveSession);
 		add(panel);
 		setPostLoadEnabled(false);
 		loadButton.addActionListener(this::loadButtonClicked);
-		oX.addChangeListener(e -> alignColumnToAxis());
-		viewFullMap.addActionListener(e -> new RenderWindow(data,new int[] {(int)oX.getValue(),(int)oZ.getValue()},(int)scale.getValue()).setVisible(true));
+		originX.addChangeListener(e -> alignColumnToAxis());
+		viewFullMap.addActionListener(e -> new RenderWindow(data,new int[] {(int)originX.getValue(),(int)originZ.getValue()},(int)scale.getValue()).setVisible(true));
 		viewHeightMap.addActionListener(e -> new HeightMapWindow(data,(int)heightColumn.getValue(),
-				new int[] {(int)oX.getValue(),(int)oZ.getValue()},(int)scale.getValue()).setVisible(true));
+				new int[] {(int)originX.getValue(),(int)originZ.getValue()},(int)scale.getValue()).setVisible(true));
 		viewMaterials.addActionListener(e -> new MaterialWindow(data).setVisible(true));
 		exportButton.addActionListener(this::exportButtonClicked);
 		addWindowListener(new WindowListener() {
 			@Override
 			public void windowClosing(WindowEvent e) {
-				Config.save(loadPath.getText(),useHeightShades.isSelected(),useShade4.isSelected(),
-						new int[] {(int)oX.getValue(),(int)oZ.getValue()},
-						(int)scale.getValue(),(int)heightColumn.getValue(),(int)mapID.getValue(),
-						dataVersionSelector.getSelectedIndex());
+				if(saveSession.isSelected())
+					Session.save(loadPath.getText(),useHeightShades.isSelected(),useShade4.isSelected(),
+							new int[] {(int)originX.getValue(),(int)originZ.getValue()},
+							(int)scale.getValue(),(int)heightColumn.getValue(),(int)mapID.getValue(),
+							dataVersionSelector.getSelectedIndex());
 			}
 			@Override
 			public void windowActivated(WindowEvent e) {}
@@ -151,8 +155,8 @@ public class WindowConsole extends JFrame {
 	}
 	private void alignColumnToAxis() {
 		if(data!=null) {
-			int min=(int)oX.getValue(),max=min+data.pixels.length-1;
-			heightColumn.setModel(new SpinnerNumberModel(Config.heightColumn>=min&&Config.heightColumn<=max?Config.heightColumn:min,min,max,1));
+			int min=(int)originX.getValue(),max=min+data.pixels.length-1;
+			heightColumn.setModel(new SpinnerNumberModel(Session.heightColumn>=min&&Session.heightColumn<=max?Session.heightColumn:min,min,max,1));
 		}
 	}
 	private void setPostLoadEnabled(boolean enable) {
@@ -198,9 +202,9 @@ public class WindowConsole extends JFrame {
 	private void exportButtonClicked(ActionEvent e) {
 		try {
 			int id=(int)mapID.getValue();
-			for(int oy=0;oy<data.materials[0].length;oy+=128)
+			for(int oz=0;oz<data.materials[0].length;oz+=128)
 				for(int ox=0;ox<data.materials.length;ox+=128) {
-					NBTFiles.exportMap(Main.directory+"map_"+id+".dat",data.materials,new int[] {ox,oy},dataVersionLoaded);
+					NBTFiles.exportMap(Main.directory+"map_"+id+".dat",data.materials,ox,oz,dataVersionLoaded,(int)originX.getValue(),(int)originZ.getValue());
 					id++;
 				}
 		} catch(IOException ex) {}

@@ -1,5 +1,5 @@
 bin/*
 .settings/*
-config.dat
+mcmapart-session.gz
 .classpath
 .project

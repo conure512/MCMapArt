@@ -9,7 +9,7 @@ public class Main {
 		} catch(Exception e) {
 			directory="";
 		}
-		Config.load();
+		Session.load();
 		System.setProperty("sun.java2d.uiScale","1");
 	}
 	public static void main(String[] args) {
@@ -69,7 +69,9 @@ public class Main {
 	private static int[] getNearestColor(int[] color,boolean useHeightShades,boolean useShade4,int maxVersion) {
 		double min=Double.MAX_VALUE,d;
 		int[] sol=null;
-		for(MapColor c:Constants.colors) if(c.dataVersion<=maxVersion) {
+		for(MapColor c:Constants.colors) {
+			if(c.dataVersion>maxVersion)
+				break;
 			d=sqrDist(color,c.base);
 			if(d<min) {
 				min=d;
@@ -87,7 +89,7 @@ public class Main {
 					sol=c.dark;
 				}
 			}
-			if(useShade4&&maxVersion>=DataVersion.V1_8.id) { //shade4 is bugged pre-1.8
+			if(useShade4) {
 				d=sqrDist(color,c.shade4);
 				if(d<min) {
 					min=d;
