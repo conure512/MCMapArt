@@ -7,32 +7,36 @@ import java.util.zip.GZIPOutputStream;
 public class NBTFiles {
 	private static final byte END=0,BYTE=1,SHORT=2,INT=3,BYTE_ARRAY=7,STRING=8,LIST=9,COMPOUND=10;
 	static void exportMap(String path,MapColor[][] materials,int offsetX,int offsetZ,int dataVersion,int topCornerX,int topCornerZ) throws IOException {
-		DataOutputStream writer=new DataOutputStream(new GZIPOutputStream(new FileOutputStream(new File(path))));
-		openTag(writer,COMPOUND,"");
-		openTag(writer,COMPOUND,"data");
-		openTagByteArray(writer,"colors",16384);
-		for(int z=offsetZ;z<128+offsetZ;z++)
-			for(int x=offsetX;x<128+offsetX;x++)
-				writer.write(materials[x][z].colorID);
-		writeTagByte(writer,"scale",0);
-		writeTagByte(writer,"trackingPosition",0);
-		writeTagInt(writer,"xCenter",topCornerX+offsetX+64);
-		writeTagInt(writer,"zCenter",topCornerZ+offsetZ+64);
-		writeTagByte(writer,"unlimitedTracking",0);
-		writeTagByte(writer,"locked",1);
-		openTagList(writer,"banners",COMPOUND,0);
-		openTagList(writer,"frames",COMPOUND,0);
-		if(dataVersion>=DataVersion.V1_16.id)
-			writeTagString(writer,"dimension","");
-		else {
-			writeTagByte(writer,"dimension",20);
-			writeTagShort(writer,"width",128); // width and height are required in 1.12 and below
-			writeTagShort(writer,"height",128); // but won't cause errors in later versions
+		try(DataOutputStream writer=new DataOutputStream(new GZIPOutputStream(new FileOutputStream(new File(path))))) {
+			openTag(writer,COMPOUND,"");
+			openTag(writer,COMPOUND,"data");
+			openTagByteArray(writer,"colors",16384);
+			for(int z=offsetZ;z<128+offsetZ;z++)
+				for(int x=offsetX;x<128+offsetX;x++)
+					try {
+						writer.write(materials[x][z].colorID);
+					} catch(ArrayIndexOutOfBoundsException e) {
+						writer.write(MapColor.NONE.colorID);
+					}
+			writeTagByte(writer,"scale",0);
+			writeTagByte(writer,"trackingPosition",0);
+			writeTagInt(writer,"xCenter",topCornerX+offsetX+64);
+			writeTagInt(writer,"zCenter",topCornerZ+offsetZ+64);
+			writeTagByte(writer,"unlimitedTracking",0);
+			writeTagByte(writer,"locked",1);
+			openTagList(writer,"banners",COMPOUND,0);
+			openTagList(writer,"frames",COMPOUND,0);
+			if(dataVersion>=DataVersion.V1_16.id)
+				writeTagString(writer,"dimension","");
+			else {
+				writeTagByte(writer,"dimension",20);
+				writeTagShort(writer,"width",128); // width and height are required in 1.12 and below
+				writeTagShort(writer,"height",128); // but won't cause errors in later versions
+			}
+			writer.writeByte(END);
+			writeTagInt(writer,"DataVersion",dataVersion);
+			writer.writeByte(END);
 		}
-		writer.writeByte(END);
-		writeTagInt(writer,"DataVersion",dataVersion);
-		writer.writeByte(END);
-		writer.close();
 	}
 	private static void writeTagByte(DataOutputStream writer,String name,int n) throws IOException {
 		openTag(writer,BYTE,name);
