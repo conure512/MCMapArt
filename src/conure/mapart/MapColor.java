@@ -1,18 +1,16 @@
 package conure.mapart;
 public class MapColor {
 	public final String name;
-	public final int dataVersion;
-	public final int[] base=new int[3],light=new int[3],dark=new int[3],shade4=new int[3];
-	public MapColor(String name,int dataVersion,int r,int g,int b) {
+	public final int[] rgb;
+	public final int colorID,intARGB;
+	public MapColor(String name,int[] rgb,int colorID) {
 		this.name=name;
-		this.dataVersion=dataVersion;
-		light[0]=r;
-		light[1]=g;
-		light[2]=b;
-		for(int i=0;i<3;i++) {
-			base[i]=(int)(light[i]*.86);
-			dark[i]=(int)(light[i]*.71);
-			shade4[i]=(int)(light[i]*.53);
-		}
+		this.rgb=rgb;
+		this.colorID=colorID;
+		intARGB=0xff000000+(rgb[0]<<16)+(rgb[1]<<8)+rgb[2];
+	}
+	@Override
+	public String toString() {
+		return name;
 	}
 }

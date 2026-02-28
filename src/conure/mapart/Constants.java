@@ -1,11 +1,8 @@
 package conure.mapart;
-import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
-import java.util.Map;
 public final class Constants {
-	public static final List<MapColor> colors=new LinkedList<MapColor>();
-	public static final Map<String,Integer> colorIDs=new HashMap<String,Integer>();
+	public static final List<MapColorCategory> colors=new LinkedList<MapColorCategory>();
 	public static final String LIGHT_SUFFIX="_LIGHT",DARK_SUFFIX="_DARK",SHADE4_SUFFIX="_SHADE4";
 	private static int colorCount=0,dataVersion;
 	static {
@@ -77,12 +74,8 @@ public final class Constants {
 		addColor(216,175,147,"RAW_IRON"); //60
 		addColor(127,167,150,"GLOW_LICHEN");
 	}
-	private static void addColor(int r,int g,int b,String id) {
-		colors.add(new MapColor(id,dataVersion,r,g,b));
+	private static void addColor(int r,int g,int b,String name) {
 		colorCount++;
-		colorIDs.put(id+DARK_SUFFIX,4*colorCount);
-		colorIDs.put(id,4*colorCount+1);
-		colorIDs.put(id+LIGHT_SUFFIX,4*colorCount+2);
-		colorIDs.put(id+SHADE4_SUFFIX,4*colorCount+3);
+		colors.add(new MapColorCategory(name,colorCount,dataVersion,new int[] {r,g,b}));
 	}
 }

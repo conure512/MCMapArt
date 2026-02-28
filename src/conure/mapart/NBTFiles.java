@@ -6,14 +6,14 @@ import java.io.IOException;
 import java.util.zip.GZIPOutputStream;
 public class NBTFiles {
 	private static final byte END=0,BYTE=1,SHORT=2,INT=3,BYTE_ARRAY=7,STRING=8,LIST=9,COMPOUND=10;
-	static void exportMap(String path,String[][] materials,int offsetX,int offsetZ,int dataVersion,int topCornerX,int topCornerZ) throws IOException {
+	static void exportMap(String path,MapColor[][] materials,int offsetX,int offsetZ,int dataVersion,int topCornerX,int topCornerZ) throws IOException {
 		DataOutputStream writer=new DataOutputStream(new GZIPOutputStream(new FileOutputStream(new File(path))));
 		openTag(writer,COMPOUND,"");
 		openTag(writer,COMPOUND,"data");
 		openTagByteArray(writer,"colors",16384);
 		for(int z=offsetZ;z<128+offsetZ;z++)
 			for(int x=offsetX;x<128+offsetX;x++)
-				writer.write(getColorID(materials,x,z));
+				writer.write(materials[x][z].colorID);
 		writeTagByte(writer,"scale",0);
 		writeTagByte(writer,"trackingPosition",0);
 		writeTagInt(writer,"xCenter",topCornerX+offsetX+64);
@@ -33,13 +33,6 @@ public class NBTFiles {
 		writeTagInt(writer,"DataVersion",dataVersion);
 		writer.writeByte(END);
 		writer.close();
-	}
-	private static int getColorID(String[][] materials,int x,int y) {
-		try {
-			return Constants.colorIDs.get(materials[x][y]);
-		} catch(IndexOutOfBoundsException e) {
-			return 0;
-		}
 	}
 	private static void writeTagByte(DataOutputStream writer,String name,int n) throws IOException {
 		openTag(writer,BYTE,name);

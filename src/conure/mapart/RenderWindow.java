@@ -9,18 +9,16 @@ import javax.swing.JLabel;
 import javax.swing.JPanel;
 public class RenderWindow extends JFrame {
 	private static final long serialVersionUID=1L;
-	private String[][] materialMap;
 	private final JLabel imgLabel,materialLabel;
-	public RenderWindow(MaterialMap data,int[] origin,int scale) {
+	public RenderWindow(MapColor[][] data,int[] origin,int scale) {
 		super("Map View");
 		setDefaultCloseOperation(DISPOSE_ON_CLOSE);
-		materialMap=data.materials;
-		int w=data.pixels.length,h=data.pixels[0].length;
+		int w=data.length,h=data[0].length;
 		BufferedImage mapImage=new BufferedImage(scale*w,scale*h,BufferedImage.TYPE_INT_ARGB);
 		int[] raster=((DataBufferInt)mapImage.getRaster().getDataBuffer()).getData();
 		for(int y=0;y<h;y++)
 			for(int x=0;x<w;x++)
-				Main.setPixelRegion(raster,scale,w,x,y,data.pixels[x][y]);
+				Main.setPixelRegion(raster,scale,w,x,y,data[x][y].intARGB);
 		w*=scale;
 		h*=scale;
 		setSize(w+30,h+70);
@@ -36,7 +34,7 @@ public class RenderWindow extends JFrame {
 			@Override
 			public void mouseMoved(MouseEvent e) {
 				int x=e.getX()/scale,y=e.getY()/scale;
-				materialLabel.setText("["+(origin[0]+x)+","+(origin[1]+y)+"] "+materialMap[x][y]);
+				materialLabel.setText("["+(origin[0]+x)+","+(origin[1]+y)+"] "+data[x][y].name);
 			}
 		});
 		panel.add(materialLabel);

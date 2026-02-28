@@ -26,7 +26,7 @@ public class WindowConsole extends JFrame {
 	private final JLabel mapIcon,errorMsg,fileCount;
 	private final JComboBox<DataVersion> dataVersionSelector;
 	private int dataVersionLoaded=0;
-	private MaterialMap data;
+	private MapColor[][] data;
 	public WindowConsole() {
 		super("Minecraft Map Generator");
 		setBounds(100,100,550,270);
@@ -155,7 +155,7 @@ public class WindowConsole extends JFrame {
 	}
 	private void alignColumnToAxis() {
 		if(data!=null) {
-			int min=(int)originX.getValue(),max=min+data.pixels.length-1;
+			int min=(int)originX.getValue(),max=min+data.length-1;
 			heightColumn.setModel(new SpinnerNumberModel(Session.heightColumn>=min&&Session.heightColumn<=max?Session.heightColumn:min,min,max,1));
 		}
 	}
@@ -187,24 +187,24 @@ public class WindowConsole extends JFrame {
 		errorMsg.setVisible(false);
 		setPostLoadEnabled(true);
 		alignColumnToAxis();
-		int wD=data.pixels.length,hD=data.pixels[0].length,
+		int wD=data.length,hD=data[0].length,
 				w=(int)(128.0*wD/Math.max(wD,hD)),h=(int)(128.0*hD/Math.max(wD,hD));
 		BufferedImage icon=new BufferedImage(w,h,BufferedImage.TYPE_INT_ARGB);
 		int[] raster=((DataBufferInt)icon.getRaster().getDataBuffer()).getData();
 		for(int y=0;y<h;y++)
 			for(int x=0;x<w;x++)
-				raster[y*w+x]=data.pixels[x*wD/w][y*hD/h];
+				raster[y*w+x]=data[x*wD/w][y*hD/h].intARGB;
 		mapIcon.setIcon(new ImageIcon(icon));
 		mapIcon.setSize(w,h);
-		int c=(int)Math.ceil(data.materials.length/128d)*(int)Math.ceil(data.materials[0].length/128d);
+		int c=(int)Math.ceil(data.length/128d)*(int)Math.ceil(data[0].length/128d);
 		fileCount.setText("<html>Exporting will create<br/>"+c+" map file"+(c==1?"":"s")+".</html>");
 	}
 	private void exportButtonClicked(ActionEvent e) {
 		try {
 			int id=(int)mapID.getValue();
-			for(int oz=0;oz<data.materials[0].length;oz+=128)
-				for(int ox=0;ox<data.materials.length;ox+=128) {
-					NBTFiles.exportMap(Main.directory+"map_"+id+".dat",data.materials,ox,oz,dataVersionLoaded,(int)originX.getValue(),(int)originZ.getValue());
+			for(int oz=0;oz<data[0].length;oz+=128)
+				for(int ox=0;ox<data.length;ox+=128) {
+					NBTFiles.exportMap(Main.directory+"map_"+id+".dat",data,ox,oz,dataVersionLoaded,(int)originX.getValue(),(int)originZ.getValue());
 					id++;
 				}
 		} catch(IOException ex) {}
