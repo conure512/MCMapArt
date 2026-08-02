@@ -59,7 +59,6 @@ public final class Session {
 			writer.writeInt(col);
 			writer.writeInt(id);
 			writer.writeInt(vInd);
-			writer.close();
 		} catch(IOException e) {}
 	}
 }

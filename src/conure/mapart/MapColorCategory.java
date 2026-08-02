@@ -2,7 +2,7 @@ package conure.mapart;
 public class MapColorCategory {
 	public final String name;
 	public final int colorIndex,dataVersion;
-	public final MapColor base,light,dark,shade4;
+	public final MapColor light,base,dark,shade4;
 	public MapColorCategory(String name,int colorIndex,int dataVersion,int[] lightRGB) {
 		this.name=name;
 		this.colorIndex=colorIndex;
@@ -13,9 +13,9 @@ public class MapColorCategory {
 			darkRGB[i]=(int)(lightRGB[i]*.71);
 			shade4RGB[i]=(int)(lightRGB[i]*.53);
 		}
-		dark=new MapColor(name+Constants.DARK_SUFFIX,darkRGB,4*colorIndex);
-		base=new MapColor(name,baseRGB,4*colorIndex+1);
 		light=new MapColor(name+Constants.LIGHT_SUFFIX,lightRGB,4*colorIndex+2);
+		base=new MapColor(name,baseRGB,4*colorIndex+1);
+		dark=new MapColor(name+Constants.DARK_SUFFIX,darkRGB,4*colorIndex);
 		shade4=new MapColor(name+Constants.SHADE4_SUFFIX,shade4RGB,4*colorIndex+3);
 	}
 }

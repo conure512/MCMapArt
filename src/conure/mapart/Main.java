@@ -5,13 +5,14 @@ import java.util.HashMap;
 public class Main {
 	static String directory;
 	static {
+		System.setProperty("sun.java2d.uiScale.enabled","true");
+		System.setProperty("sun.java2d.uiScale","1.0");
 		try {
 			directory=new File(Main.class.getProtectionDomain().getCodeSource().getLocation().toURI()).getParent()+File.separatorChar;
 		} catch(Exception e) {
 			directory="";
 		}
 		Session.load();
-		System.setProperty("sun.java2d.uiScale","1");
 	}
 	public static void main(String[] args) {
 		new WindowConsole().setVisible(true);
@@ -55,7 +56,7 @@ public class Main {
 		return new int[] {(rgb&0xff0000)>>16,(rgb&0xff00)>>8,rgb&0xff};
 	}
 	private static MapColor getNearestColor(int[] color,boolean useHeightShades,boolean useShade4,int maxVersion) {
-		double min=Double.MAX_VALUE,d;
+		int min=Integer.MAX_VALUE,d;
 		MapColor sol=null;
 		for(MapColorCategory c:Constants.colors) {
 			if(c.dataVersion>maxVersion)
@@ -87,10 +88,13 @@ public class Main {
 		}
 		return sol;
 	}
-	private static double sqrDist(int[] c1,int[] c2) {
-		double d=0;
+	private static int sqrDist(int[] c1,int[] c2) {
+		int d=0;
 		for(int i=0;i<3;i++)
-			d+=Math.pow(c1[i]-c2[i],2);
+			d+=intSquared(c1[i]-c2[i]);
 		return d;
+	}
+	private static int intSquared(int n) {
+		return n*n;
 	}
 }

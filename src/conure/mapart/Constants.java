@@ -42,7 +42,7 @@ public final class Constants {
 		addColor(74,128,255,"LAPIS");
 		addColor(0,217,58,"EMERALD");
 		addColor(129,86,49,"PODZOL");
-		dataVersion=DataVersion.V1_8.id;
+		dataVersion=DataVersion.V1_8_1.id;
 		addColor(112,2,0,"NETHER"); //35
 		dataVersion=DataVersion.V1_12.id;
 		addColor(209,177,161,"TERRACOTTA_WHITE");

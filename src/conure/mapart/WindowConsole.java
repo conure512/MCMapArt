@@ -1,12 +1,21 @@
 package conure.mapart;
+import java.awt.Color;
+import java.awt.Cursor;
+import java.awt.Desktop;
 import java.awt.event.ActionEvent;
+import java.awt.event.MouseAdapter;
+import java.awt.event.MouseEvent;
+import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
-import java.awt.event.WindowListener;
 import java.awt.image.BufferedImage;
 import java.awt.image.DataBufferInt;
 import java.io.File;
 import java.io.IOException;
+import java.net.URI;
+import java.net.URISyntaxException;
+import java.util.Vector;
 import javax.imageio.ImageIO;
+import javax.swing.DefaultComboBoxModel;
 import javax.swing.ImageIcon;
 import javax.swing.JButton;
 import javax.swing.JCheckBox;
@@ -24,16 +33,16 @@ public class WindowConsole extends JFrame {
 	private final JCheckBox useHeightShades,useShade4,saveSession;
 	private final JSpinner originX,originZ,scale,heightColumn,mapID;
 	private final JLabel mapIcon,errorMsg,fileCount;
-	private final JComboBox<DataVersion> dataVersionSelector;
-	private int dataVersionLoaded=0;
+	private final JComboBox<DataVersion.ColorRange> importVersion;
+	private final JComboBox<DataVersion.ExportRange> exportVersion;
 	private MapColor[][] data;
 	public WindowConsole() {
-		super("Minecraft Map Generator");
-		setBounds(100,100,550,270);
+		super("Conure's Minecraft Map Generator");
+		setBounds(100,100,600,270);
 		setDefaultCloseOperation(EXIT_ON_CLOSE);
 		JPanel panel=new JPanel(null);
 		JLabel label=new JLabel("Image File to Load");
-		label.setBounds(2,0,105,15);
+		label.setBounds(2,0,115,15);
 		panel.add(label);
 		loadPath=new JTextField(Session.imageToLoad);
 		loadPath.setBounds(2,16,250,20);
@@ -41,19 +50,19 @@ public class WindowConsole extends JFrame {
 		loadButton=new JButton("Generate Map");
 		loadButton.setBounds(2,36,130,20);
 		panel.add(loadButton);
-		dataVersionSelector=new JComboBox<DataVersion>(DataVersion.values());
-		dataVersionSelector.setSelectedIndex(Session.versionIndex);
-		dataVersionSelector.setBounds(134,36,100,20);
-		panel.add(dataVersionSelector);
+		importVersion=new JComboBox<DataVersion.ColorRange>(DataVersion.ColorRange.values());
+		importVersion.setSelectedIndex(Session.versionIndex);
+		importVersion.setBounds(134,36,60,20);
+		panel.add(importVersion);
 		errorMsg=new JLabel();
 		errorMsg.setBounds(5,56,130,15);
 		errorMsg.setVisible(false);
 		panel.add(errorMsg);
 		label=new JLabel("Map Loading Options");
-		label.setBounds(260,0,125,15);
+		label.setBounds(260,0,135,15);
 		panel.add(label);
 		useHeightShades=new JCheckBox("Use Height Shading",Session.useHeightShades);
-		useHeightShades.setBounds(256,15,140,20);
+		useHeightShades.setBounds(256,15,150,20);
 		panel.add(useHeightShades);
 		useShade4=new JCheckBox("Use Shade4",Session.useShade4);
 		useShade4.setBounds(256,35,95,20);
@@ -80,10 +89,10 @@ public class WindowConsole extends JFrame {
 		originZ.setBounds(435,37,50,20);
 		panel.add(originZ);
 		viewFullMap=new JButton("View Interactive Map");
-		viewFullMap.setBounds(2,80,155,20);
+		viewFullMap.setBounds(2,80,165,20);
 		panel.add(viewFullMap);
 		viewHeightMap=new JButton("View Height Map");
-		viewHeightMap.setBounds(157,80,155,20);
+		viewHeightMap.setBounds(167,80,165,20);
 		panel.add(viewHeightMap);
 		label=new JLabel("at scale");
 		label.setBounds(22,105,50,15);
@@ -92,35 +101,56 @@ public class WindowConsole extends JFrame {
 		scale.setBounds(70,102,32,20);
 		panel.add(scale);
 		label=new JLabel("for column x=");
-		label.setBounds(170,105,100,15);
+		label.setBounds(180,105,100,15);
 		panel.add(label);
 		heightColumn=new JSpinner(new SpinnerNumberModel(Session.heightColumn,Session.heightColumn,Session.heightColumn,1));
-		heightColumn.setBounds(248,102,50,20);
+		heightColumn.setBounds(264,102,50,20);
 		panel.add(heightColumn);
 		mapIcon=new JLabel("No image loaded.");
-		mapIcon.setBounds(315,80,100,15);
+		mapIcon.setBounds(335,80,110,15);
 		panel.add(mapIcon);
 		viewMaterials=new JButton("View Materials");
-		viewMaterials.setBounds(2,145,155,20);
+		viewMaterials.setBounds(2,145,165,20);
 		panel.add(viewMaterials);
 		exportButton=new JButton("Export to Files");
-		exportButton.setBounds(157,145,155,20);
+		exportButton.setBounds(167,145,165,20);
 		panel.add(exportButton);
+		label=new JLabel("for version");
+		label.setBounds(166,170,80,15);
+		panel.add(label);
+		exportVersion=new JComboBox<DataVersion.ExportRange>();
+		exportVersion.setBounds(232,168,100,20);
+		panel.add(exportVersion);
+		label=new JLabel("Starting Map ID:");
+		label.setBounds(166,195,100,15);
+		panel.add(label);
 		model=new SpinnerNumberModel();
 		model.setMinimum(0);
 		model.setValue(Session.mapID);
-		label=new JLabel("Starting map ID:");
-		label.setBounds(165,170,90,15);
-		panel.add(label);
 		mapID=new JSpinner(model);
-		mapID.setBounds(258,168,40,20);
+		mapID.setBounds(270,193,40,20);
 		panel.add(mapID);
 		fileCount=new JLabel();
-		fileCount.setBounds(165,186,120,40);
+		fileCount.setSize(140,30);
 		panel.add(fileCount);
 		saveSession=new JCheckBox("Save Session on Exit",Session.sessionFound);
-		saveSession.setBounds(2,180,160,20);
+		saveSession.setBounds(2,185,160,20);
 		panel.add(saveSession);
+		label=new JLabel("[GitHub]");
+		label.setForeground(Color.BLUE.darker());
+		label.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
+		label.addMouseListener(new MouseAdapter() {
+			@Override
+			public void mouseClicked(MouseEvent e) {
+				try {
+					Desktop.getDesktop().browse(new URI("http://github.com/conure512/MCMapArt"));
+				} catch (IOException|URISyntaxException e1) {
+					e1.printStackTrace();
+				}
+			}
+		});
+		label.setBounds(5,210,60,20);
+		panel.add(label);
 		add(panel);
 		setPostLoadEnabled(false);
 		loadButton.addActionListener(this::loadButtonClicked);
@@ -130,27 +160,15 @@ public class WindowConsole extends JFrame {
 				new int[] {(int)originX.getValue(),(int)originZ.getValue()},(int)scale.getValue()).setVisible(true));
 		viewMaterials.addActionListener(e -> new MaterialWindow(data).setVisible(true));
 		exportButton.addActionListener(this::exportButtonClicked);
-		addWindowListener(new WindowListener() {
+		addWindowListener(new WindowAdapter() {
 			@Override
 			public void windowClosing(WindowEvent e) {
 				if(saveSession.isSelected())
 					Session.save(loadPath.getText(),useHeightShades.isSelected(),useShade4.isSelected(),
 							new int[] {(int)originX.getValue(),(int)originZ.getValue()},
 							(int)scale.getValue(),(int)heightColumn.getValue(),(int)mapID.getValue(),
-							dataVersionSelector.getSelectedIndex());
+							importVersion.getSelectedIndex());
 			}
-			@Override
-			public void windowActivated(WindowEvent e) {}
-			@Override
-			public void windowClosed(WindowEvent e) {}
-			@Override
-			public void windowDeactivated(WindowEvent e) {}
-			@Override
-			public void windowDeiconified(WindowEvent e) {}
-			@Override
-			public void windowIconified(WindowEvent e) {}
-			@Override
-			public void windowOpened(WindowEvent e) {}
 		});
 	}
 	private void alignColumnToAxis() {
@@ -166,9 +184,11 @@ public class WindowConsole extends JFrame {
 		scale.setEnabled(enable);
 		heightColumn.setEnabled(enable);
 		exportButton.setEnabled(enable);
+		exportVersion.setEnabled(enable);
 		mapID.setEnabled(enable);
 	}
 	private void loadButtonClicked(ActionEvent e) {
+		int dv;
 		try {
 			BufferedImage img=ImageIO.read(new File(loadPath.getText()));
 			if(img==null) {
@@ -176,9 +196,8 @@ public class WindowConsole extends JFrame {
 				errorMsg.setVisible(true);
 				return;
 			}
-			int dv=((DataVersion)dataVersionSelector.getSelectedItem()).id;
+			dv=((DataVersion.ColorRange)importVersion.getSelectedItem()).minVersion.id;
 			data=Main.generateMap(img,useHeightShades.isSelected(),useShade4.isSelected(),dv);
-			dataVersionLoaded=dv; //Only update version if generateMap() succeeds
 		} catch(IOException ex) {
 			errorMsg.setText("Unable to open file.");
 			errorMsg.setVisible(true);
@@ -186,6 +205,9 @@ public class WindowConsole extends JFrame {
 		}
 		errorMsg.setVisible(false);
 		setPostLoadEnabled(true);
+		Vector<DataVersion.ExportRange> versions=DataVersion.ExportRange.above(dv);
+		exportVersion.setModel(new DefaultComboBoxModel<DataVersion.ExportRange>(versions));
+		exportVersion.setSelectedIndex(versions.size()-1);
 		alignColumnToAxis();
 		int wD=data.length,hD=data[0].length,
 				w=(int)(128.0*wD/Math.max(wD,hD)),h=(int)(128.0*hD/Math.max(wD,hD));
@@ -198,15 +220,20 @@ public class WindowConsole extends JFrame {
 		mapIcon.setSize(w,h);
 		int c=(int)Math.ceil(data.length/128d)*(int)Math.ceil(data[0].length/128d);
 		fileCount.setText("<html>Exporting will create<br/>"+c+" map file"+(c==1?"":"s")+".</html>");
+		fileCount.setLocation(mapIcon.getX()+mapIcon.getWidth()+4,78);
 	}
 	private void exportButtonClicked(ActionEvent e) {
 		try {
-			int id=(int)mapID.getValue();
+			int id=(int)mapID.getValue(),
+				dv=((DataVersion.ExportRange)exportVersion.getSelectedItem()).minVersion.id;
+			String prefix=(dv>=DataVersion.V26_1.id)?"":"map_";
 			for(int oz=0;oz<data[0].length;oz+=128)
 				for(int ox=0;ox<data.length;ox+=128) {
-					NBTFiles.exportMap(Main.directory+"map_"+id+".dat",data,ox,oz,dataVersionLoaded,(int)originX.getValue(),(int)originZ.getValue());
+					NBTFiles.exportMap(Main.directory+prefix+id+".dat",data,dv,(int)originX.getValue(),(int)originZ.getValue(),ox,oz);
 					id++;
 				}
-		} catch(IOException ex) {}
+		} catch(IOException ex) {
+			ex.printStackTrace();
+		}
 	}
 }

@@ -6,7 +6,7 @@ import java.io.IOException;
 import java.util.zip.GZIPOutputStream;
 public class NBTFiles {
 	private static final byte END=0,BYTE=1,SHORT=2,INT=3,BYTE_ARRAY=7,STRING=8,LIST=9,COMPOUND=10;
-	static void exportMap(String path,MapColor[][] materials,int offsetX,int offsetZ,int dataVersion,int topCornerX,int topCornerZ) throws IOException {
+	static void exportMap(String path,MapColor[][] materials,int dataVersion,int topCornerX,int topCornerZ,int offsetX,int offsetZ) throws IOException {
 		try(DataOutputStream writer=new DataOutputStream(new GZIPOutputStream(new FileOutputStream(new File(path))))) {
 			openTag(writer,COMPOUND,"");
 			openTag(writer,COMPOUND,"data");
@@ -28,10 +28,11 @@ public class NBTFiles {
 			openTagList(writer,"frames",COMPOUND,0);
 			if(dataVersion>=DataVersion.V1_16.id)
 				writeTagString(writer,"dimension","");
-			else {
+			else
 				writeTagByte(writer,"dimension",20);
-				writeTagShort(writer,"width",128); // width and height are required in 1.12 and below
-				writeTagShort(writer,"height",128); // but won't cause errors in later versions
+			if(dataVersion<DataVersion.V1_13.id) {
+				writeTagShort(writer,"width",128);
+				writeTagShort(writer,"height",128);
 			}
 			writer.writeByte(END);
 			writeTagInt(writer,"DataVersion",dataVersion);

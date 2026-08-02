@@ -7,9 +7,11 @@ The app is simply a runnable JAR file - run it to open the interactive window (r
 ### Method 1: Export to Files
 (recommended for Creative Mode)
 
-With a map loaded into the program, clicking the “Export to Files” button will cause one or more files to be generated in the same directory as the JAR. Each file represents one map - an image larger than 128x128 pixels will result in multiple maps, which can be pieced together in-game to form the complete image.
-To import these maps into a Minecraft world, simply go to the “data” folder in the world’s directory and place the files there. Make sure the file names are not changed - they should all look like `map_#.dat` where `#` is some number. If the world is currently open (on a client or server), shut it down before importing the files, then restart it once they’ve been imported.
-Upon re-entering the world, make sure you have command permissions, and type the following command:
+With a map loaded into the program, clicking the “Export to Files” button will cause one or more files to be generated in the same directory as the JAR. Each file represents one map - an image larger than 128x128 pixels will result in multiple maps (Note 1), which can be pieced together in-game to form the complete image.
+
+To import these maps into a Minecraft world, simply go to the `data/minecraft/maps/` folder in the world’s directory and place the files there. Make sure the file names are not changed - they should all look like `#.dat` where `#` is some number (Note 2). If you're in Minecraft 1.21.11 or below, the maps will instead look like `map_#.dat`, and you'll instead have to place them inside the world's `data/` folder.
+
+If the world is currently open (on a client or server), shut it down before importing the files, then restart it once they’ve been imported. Upon re-entering the world, make sure you have command permissions, and type the following command:
 
 `/give @s filled_map[map_id=#]` (1.20.5+)
 
@@ -22,7 +24,7 @@ where `#` is the same number as `map_#.dat`. (If you’re importing multiple fil
 
 The program contains several tools to help a player build a map manually.
 
-While a map is loaded, the “View Interactive Map” button will open a window to fully display every pixel on the map, which can be resized using the “Scale” setting. Mouse over any pixel to see its x-z coordinates (the top-left pixel is at the coordinates specified by the x and z selectors under "Top-Left Corner") as well as its material category (see the [Minecraft Wiki Color Table](https://minecraft.wiki/w/Map_item_format) for a list of which materials belong to which category). A material category with the suffix `_LIGHT`, `_DARK`, or `_SHADE4` means that the color is a non-neutral variant of that category (Note 3).
+While a map is loaded, the “View Interactive Map” button will open a window to fully display every pixel on the map, which can be resized using the “Scale” setting. Mouse over any pixel to see its x-z coordinates (the top-left pixel is at the coordinates specified by the x and z selectors under "Top-Left Corner") as well as its material category (see [Map Item Format](https://minecraft.wiki/w/Map_item_format) on the wiki for a list of which materials belong to which category). A material category with the suffix `_LIGHT`, `_DARK`, or `_SHADE4` means that the color is a non-neutral variant of that category (Note 3).
 
 The “View Height Map” button opens a window displaying a single north-south strip of the map, where the z-axis is on the horizontal and the y-axis is on the vertical. The x-coordinate is at a constant value across the image, and can be changed with the number setting underneath the button. As before, mousing over a pixel will display its x-z coordinates and material. The height map represents a recommended configuration for blocks in that strip, to achieve the desired effect. These height variations are only relevant when Height Shades are on and Shade4 is off (Note 3).
 
