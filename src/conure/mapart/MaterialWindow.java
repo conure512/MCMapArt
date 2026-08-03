@@ -5,11 +5,13 @@ import javax.swing.JFrame;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
 public class MaterialWindow extends JFrame {
-	private static final long serialVersionUID=1L;
+	private static final long serialVersionUID=512002003L;
 	public MaterialWindow(MapColor[][] data) {
+		this(getMaterialCounts(data));
+	}
+	public MaterialWindow(HashMap<String,Integer> counts) {
 		super("Materials");
 		setDefaultCloseOperation(DISPOSE_ON_CLOSE);
-		HashMap<String,Integer> counts=Main.getMaterialCounts(data);
 		int len=counts.keySet().size();
 		setSize(300,16*(5+len));
 		JPanel panel=new JPanel(new GridLayout(len+1,2));
@@ -23,5 +25,24 @@ public class MaterialWindow extends JFrame {
 		JPanel nullPanel=new JPanel(null);
 		nullPanel.add(panel);
 		add(nullPanel);
+	}
+	private static HashMap<String,Integer> getMaterialCounts(MapColor[][] data) {
+		HashMap<String,Integer> counts=new HashMap<String,Integer>();
+		Integer n;
+		String mat;
+		for(MapColor[] col:data)
+			for(MapColor pix:col) {
+				mat=pix.name;
+				if(mat.endsWith(Constants.LIGHT_SUFFIX))
+					mat=mat.substring(0,mat.length()-Constants.LIGHT_SUFFIX.length());
+				else if(mat.endsWith(Constants.DARK_SUFFIX))
+					mat=mat.substring(0,mat.length()-Constants.DARK_SUFFIX.length());
+				else if(mat.endsWith(Constants.SHADE4_SUFFIX))
+					mat="SHADE4 (Unobtainable)";
+				n=counts.get(mat);
+				n=(n==null)?1:n+1;
+				counts.put(mat,n);
+			}
+		return counts;
 	}
 }

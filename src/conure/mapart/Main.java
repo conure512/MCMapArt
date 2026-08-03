@@ -1,16 +1,16 @@
 package conure.mapart;
 import java.awt.image.BufferedImage;
 import java.io.File;
-import java.util.HashMap;
+import javax.swing.filechooser.FileSystemView;
 public class Main {
-	static String directory;
+	static File directory;
 	static {
 		System.setProperty("sun.java2d.uiScale.enabled","true");
 		System.setProperty("sun.java2d.uiScale","1.0");
 		try {
-			directory=new File(Main.class.getProtectionDomain().getCodeSource().getLocation().toURI()).getParent()+File.separatorChar;
+			directory=new File(Main.class.getProtectionDomain().getCodeSource().getLocation().toURI()).getParentFile();
 		} catch(Exception e) {
-			directory="";
+			directory=FileSystemView.getFileSystemView().getHomeDirectory();
 		}
 		Session.load();
 	}
@@ -32,25 +32,6 @@ public class Main {
 		for(int j=0;j<scale;j++)
 			for(int i=0;i<scale;i++)
 				raster[(y+j)*w+x+i]=val;
-	}
-	static HashMap<String,Integer> getMaterialCounts(MapColor[][] data) {
-		HashMap<String,Integer> counts=new HashMap<String,Integer>();
-		Integer n;
-		String mat;
-		for(MapColor[] col:data)
-			for(MapColor pix:col) {
-				mat=pix.name;
-				if(mat.endsWith(Constants.LIGHT_SUFFIX))
-					mat=mat.substring(0,mat.length()-Constants.LIGHT_SUFFIX.length());
-				else if(mat.endsWith(Constants.DARK_SUFFIX))
-					mat=mat.substring(0,mat.length()-Constants.DARK_SUFFIX.length());
-				else if(mat.endsWith(Constants.SHADE4_SUFFIX))
-					mat="SHADE4 (Unobtainable)";
-				n=counts.get(mat);
-				n=(n==null)?1:n+1;
-				counts.put(mat,n);
-			}
-		return counts;
 	}
 	private static int[] fromRGB(int rgb) {
 		return new int[] {(rgb&0xff0000)>>16,(rgb&0xff00)>>8,rgb&0xff};

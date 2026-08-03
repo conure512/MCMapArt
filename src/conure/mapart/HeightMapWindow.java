@@ -8,7 +8,7 @@ import javax.swing.JFrame;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
 public class HeightMapWindow extends JFrame {
-	private static final long serialVersionUID=1L;
+	private static final long serialVersionUID=512002002L;
 	private final MapColor[] materialList;
 	private final JLabel imgLabel,materialLabel;
 	public HeightMapWindow(MapColor[][] map,int x,int[] origin,int scale) {

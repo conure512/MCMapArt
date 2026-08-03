@@ -6,8 +6,8 @@ import java.io.IOException;
 import java.util.zip.GZIPOutputStream;
 public class NBTFiles {
 	private static final byte END=0,BYTE=1,SHORT=2,INT=3,BYTE_ARRAY=7,STRING=8,LIST=9,COMPOUND=10;
-	static void exportMap(String path,MapColor[][] materials,int dataVersion,int topCornerX,int topCornerZ,int offsetX,int offsetZ) throws IOException {
-		try(DataOutputStream writer=new DataOutputStream(new GZIPOutputStream(new FileOutputStream(new File(path))))) {
+	static void exportMap(File file,MapColor[][] materials,int dataVersion,int topCornerX,int topCornerZ,int offsetX,int offsetZ) throws IOException {
+		try(DataOutputStream writer=new DataOutputStream(new GZIPOutputStream(new FileOutputStream(file)))) {
 			openTag(writer,COMPOUND,"");
 			openTag(writer,COMPOUND,"data");
 			openTagByteArray(writer,"colors",16384);

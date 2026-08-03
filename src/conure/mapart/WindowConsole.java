@@ -20,6 +20,7 @@ import javax.swing.ImageIcon;
 import javax.swing.JButton;
 import javax.swing.JCheckBox;
 import javax.swing.JComboBox;
+import javax.swing.JFileChooser;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
@@ -27,7 +28,8 @@ import javax.swing.JSpinner;
 import javax.swing.JTextField;
 import javax.swing.SpinnerNumberModel;
 public class WindowConsole extends JFrame {
-	private static final long serialVersionUID=512L;
+	private static final long serialVersionUID=512002000L;
+	private final JFileChooser browser;
 	private final JTextField loadPath;
 	private final JButton loadButton,viewFullMap,viewHeightMap,viewMaterials,exportButton;
 	private final JCheckBox useHeightShades,useShade4,saveSession;
@@ -41,12 +43,31 @@ public class WindowConsole extends JFrame {
 		setBounds(100,100,600,270);
 		setDefaultCloseOperation(EXIT_ON_CLOSE);
 		JPanel panel=new JPanel(null);
-		JLabel label=new JLabel("Image File to Load");
-		label.setBounds(2,0,115,15);
+		JLabel label=new JLabel("Enter Image File to Load, or ");
+		label.setBounds(2,1,168,15);
 		panel.add(label);
+		browser=new JFileChooser(Main.directory);
 		loadPath=new JTextField(Session.imageToLoad);
-		loadPath.setBounds(2,16,250,20);
+		loadPath.setBounds(2,16,220,20);
 		panel.add(loadPath);
+		label=new JLabel("Browse...");
+		label.setForeground(Color.BLUE);
+		label.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
+		label.addMouseListener(new MouseAdapter() {
+			@Override
+			public void mouseClicked(MouseEvent e) {
+				int action=browser.showOpenDialog(null);
+				if(action!=JFileChooser.APPROVE_OPTION)
+					return;
+				try {
+					loadPath.setText(browser.getSelectedFile().getPath());
+				} catch(Exception ex) {
+					ex.printStackTrace();
+				}
+			}
+		});
+		label.setBounds(168,1,60,15);
+		panel.add(label);
 		loadButton=new JButton("Generate Map");
 		loadButton.setBounds(2,36,130,20);
 		panel.add(loadButton);
@@ -55,7 +76,8 @@ public class WindowConsole extends JFrame {
 		importVersion.setBounds(134,36,60,20);
 		panel.add(importVersion);
 		errorMsg=new JLabel();
-		errorMsg.setBounds(5,56,130,15);
+		errorMsg.setForeground(Color.RED);
+		errorMsg.setBounds(5,56,160,15);
 		errorMsg.setVisible(false);
 		panel.add(errorMsg);
 		label=new JLabel("Map Loading Options");
@@ -137,7 +159,7 @@ public class WindowConsole extends JFrame {
 		saveSession.setBounds(2,185,160,20);
 		panel.add(saveSession);
 		label=new JLabel("[GitHub]");
-		label.setForeground(Color.BLUE.darker());
+		label.setForeground(Color.BLUE);
 		label.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
 		label.addMouseListener(new MouseAdapter() {
 			@Override
@@ -229,7 +251,7 @@ public class WindowConsole extends JFrame {
 			String prefix=(dv>=DataVersion.V26_1.id)?"":"map_";
 			for(int oz=0;oz<data[0].length;oz+=128)
 				for(int ox=0;ox<data.length;ox+=128) {
-					NBTFiles.exportMap(Main.directory+prefix+id+".dat",data,dv,(int)originX.getValue(),(int)originZ.getValue(),ox,oz);
+					NBTFiles.exportMap(new File(Main.directory,prefix+id+".dat"),data,dv,(int)originX.getValue(),(int)originZ.getValue(),ox,oz);
 					id++;
 				}
 		} catch(IOException ex) {

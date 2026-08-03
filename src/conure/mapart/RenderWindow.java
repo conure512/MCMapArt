@@ -1,14 +1,14 @@
 package conure.mapart;
-import java.awt.image.BufferedImage;
-import java.awt.image.DataBufferInt;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseMotionListener;
+import java.awt.image.BufferedImage;
+import java.awt.image.DataBufferInt;
 import javax.swing.ImageIcon;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
 public class RenderWindow extends JFrame {
-	private static final long serialVersionUID=1L;
+	private static final long serialVersionUID=512002001L;
 	private final JLabel imgLabel,materialLabel;
 	public RenderWindow(MapColor[][] data,int[] origin,int scale) {
 		super("Map View");
